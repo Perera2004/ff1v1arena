@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="FF 1v1 Arena">
+<title>FF 1v1 Arena</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<style>
+:root{--bg:#0a0a0f;--bg2:#13131a;--bg3:#1c1c26;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);--text:#f0f0f5;--text2:#9999aa;--text3:#55556a;--accent:#ff4500;--green:#00c97a;--green2:#00a362;--amber:#ffb800;--red:#ff3b3b;--blue:#3d8bff;--radius:12px;--radius-sm:8px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',sans-serif;overflow:hidden}
+.screen{display:none;flex-direction:column;height:100vh;height:100dvh;max-width:480px;margin:0 auto}
+.screen.active{display:flex}
+.header{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border);flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-icon{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-size:17px;font-weight:700}
+.logo-sub{font-size:10px;color:var(--text2);margin-top:1px}
+.content{flex:1;overflow-y:auto;padding:14px 16px;-webkit-overflow-scrolling:touch}
+.nav{display:flex;border-top:0.5px solid var(--border);flex-shrink:0;background:var(--bg2)}
+.nav-btn{flex:1;padding:10px 4px 14px;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--text3);font-size:10px;cursor:pointer}
+.nav-btn.active{color:var(--accent)}
+.nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab{display:none}.tab.active{display:block}
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.card-head{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:14px;outline:none;font-family:inherit;-webkit-appearance:none}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239999aa' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.btn{width:100%;padding:13px;border-radius:var(--radius-sm);border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:.2px}
+.btn+.btn{margin-top:8px}
+.btn-accent{background:var(--accent);color:white}
+.btn-green{background:var(--green);color:#0a0a0f}
+.btn-red{background:var(--red);color:white}
+.btn-ghost{background:var(--bg3);color:var(--text2);border:0.5px solid var(--border2)}
+.empty{text-align:center;padding:28px 0;color:var(--text3);font-size:13px}
+.empty-icon{font-size:32px;display:block;margin-bottom:8px;opacity:.4}
+.badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:999px;margin-left:6px}
+.b-wait{background:rgba(255,184,0,.15);color:var(--amber)}
+.b-live{background:rgba(61,139,255,.15);color:var(--blue)}
+.b-done{background:rgba(0,201,122,.12);color:var(--green)}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:999px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.ok{background:var(--green);color:#0a0a0f}
+.toast.err{background:var(--red);color:white}
+.toast.show{opacity:1}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;border-top:0.5px solid var(--border2);max-height:88vh;overflow-y:auto}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px;color:var(--text)}
+.loader{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:12px}
+.spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.sum-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px;text-align:center}
+.sum-val{font-size:22px;font-weight:700}
+.sum-lbl{font-size:10px;color:var(--text2);margin-top:2px}
+.room-item{padding:12px 0;border-bottom:0.5px solid var(--border)}
+.room-item:last-child{border-bottom:none}
+.room-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.room-vs{font-size:14px;font-weight:600;color:var(--text)}
+.room-meta{font-size:11px;color:var(--text2);margin-top:3px}
+.room-acts{display:flex;gap:6px;flex-shrink:0}
+.icon-btn{width:32px;height:32px;border-radius:8px;border:0.5px solid var(--border2);background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px}
+.icon-btn.green{background:rgba(0,201,122,.1);border-color:rgba(0,201,122,.3)}
+.icon-btn.red{background:rgba(255,59,59,.1);border-color:rgba(255,59,59,.3)}
+.calc-box{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:12px}
+.calc-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+.calc-row .l{color:var(--text2)}.calc-row .v{font-weight:600}
+.calc-row.total{border-top:0.5px solid var(--border);margin-top:4px;padding-top:8px}
+.calc-row.total .v{color:var(--green)}
+.stat-row{display:flex;justify-content:space-between;font-size:14px;padding:10px 0;border-bottom:0.5px solid var(--border)}
+.stat-row:last-child{border-bottom:none}
+.stat-row .l{color:var(--text2)}.stat-row .v{font-weight:600}
+.stat-row.profit .v{color:var(--green)}
+.player-search-wrap{position:relative}
+.player-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);z-index:50;max-height:180px;overflow-y:auto;margin-top:2px;display:none}
+.player-dropdown.open{display:block}
+.player-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:0.5px solid var(--border)}
+.player-opt:last-child{border-bottom:none}
+.player-opt:active{background:var(--bg3)}
+.p-opt-av{width:30px;height:30px;border-radius:50%;background:rgba(255,69,0,.15);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0}
+.sel-player{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,201,122,.08);border:0.5px solid rgba(0,201,122,.25);border-radius:var(--radius-sm);margin-top:6px}
+.sel-player-name{font-size:13px;font-weight:600;color:var(--green)}
+.sel-player-id{font-size:11px;color:var(--text2)}
+.clr-btn{margin-left:auto;background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer}
+.winner-opt{display:flex;align-items:center;gap:12px;padding:13px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer}
+.w-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,69,0,.15);border:1px solid rgba(255,69,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0}
+.hist-item{padding:10px 0;border-bottom:0.5px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.profile-card{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--border)}
+.profile-card:last-child{border-bottom:none}
+.prof-av{width:38px;height:38px;border-radius:50%;background:rgba(255,69,0,.15);border:1px solid rgba(255,69,0,.3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--accent);flex-shrink:0}
+.dep-item{padding:10px 0;border-bottom:0.5px solid var(--border)}
+.dep-item:last-child{border-bottom:none}
+.hero{background:linear-gradient(135deg,rgba(255,69,0,.15),rgba(255,106,51,.05));border:0.5px solid rgba(255,69,0,.2);border-radius:var(--radius);padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.hero-avatar{width:48px;height:48px;border-radius:50%;background:rgba(255,69,0,.2);border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--accent);flex-shrink:0}
+.points-card{background:linear-gradient(135deg,rgba(0,201,122,.1),rgba(0,163,98,.05));border:0.5px solid rgba(0,201,122,.2);border-radius:var(--radius);padding:14px;margin-bottom:12px;text-align:center}
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.mode-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 8px;text-align:center;cursor:pointer}
+.mode-card.sel{border-color:var(--accent);background:rgba(255,69,0,.08)}
+.tab-mini{display:flex;gap:6px;margin-bottom:14px;background:var(--bg3);padding:4px;border-radius:var(--radius-sm)}
+.tab-mini-btn{flex:1;padding:8px;border-radius:6px;background:none;border:none;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+.tab-mini-btn.active{background:var(--bg2);color:var(--text)}
+.upload-box{border:1.5px dashed var(--border2);border-radius:var(--radius-sm);padding:20px;text-align:center;cursor:pointer;color:var(--text2);font-size:13px;margin-bottom:10px}
+.preview-img{width:100%;border-radius:var(--radius-sm);margin-bottom:10px;border:0.5px solid var(--border)}
+.dep-amounts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.dep-amt{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px;text-align:center;cursor:pointer;font-size:14px;font-weight:600;color:var(--text)}
+.dep-amt.sel{border-color:var(--accent);background:rgba(255,69,0,.1);color:var(--accent)}
+.otp-row{display:flex;gap:8px}
+.otp-row input{flex:1}
+.otp-row button{padding:11px 14px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+.divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--text3);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:0.5px;background:var(--border)}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="screen active" id="screen-loading">
+  <div class="loader"><div class="spinner"></div><div style="font-size:13px;color:var(--text2)">Loading...</div></div>
+</div>
+
+<!-- LOGIN -->
+<div class="screen" id="screen-login">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px">
+    <div style="width:100%;max-width:360px">
+      <div style="text-align:center;margin-bottom:32px">
+        <span style="font-size:48px;display:block;margin-bottom:8px">🔥</span>
+        <h1 style="font-size:24px;font-weight:800">FF 1v1 Arena</h1>
+        <p style="font-size:13px;color:var(--text2);margin-top:4px">Lone Wolf Tournament Platform</p>
+      </div>
+      <div id="login-form">
+        <div class="field">
+          <label>Phone number</label>
+          <div class="otp-row">
+            <input id="login-phone" placeholder="07X XXX XXXX" type="tel"/>
+            <button onclick="sendOTP()">OTP යවන්න</button>
+          </div>
+        </div>
+        <div class="field" id="otp-field" style="display:none">
+          <label>OTP code</label>
+          <input id="login-otp" placeholder="6-digit code" type="number"/>
+          <div style="font-size:11px;color:var(--amber);margin-top:4px" id="otp-hint"></div>
+        </div>
+        <button class="btn btn-accent" onclick="verifyOTP()">Login / Register</button>
+        <div class="divider">හෝ</div>
+        <button class="btn btn-ghost" onclick="showAdminLogin()">🔐 Admin Login</button>
+      </div>
+      <div id="register-form" style="display:none">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:12px">📝 New account! Details fill කරන්න:</div>
+        <div class="field"><label>Your name</label><input id="reg-name" placeholder="Your name"/></div>
+        <div class="field"><label>Free Fire ID</label><input id="reg-ffid" placeholder="FF ID number" type="number"/></div>
+        <button class="btn btn-green" onclick="completeRegister()">✓ Register</button>
+      </div>
+      <div id="admin-form" style="display:none">
+        <div style="font-size:13px;color:var(--amber);margin-bottom:12px">🔐 Admin access</div>
+        <div class="field"><label>Admin password</label><input id="admin-pass" placeholder="Password" type="password"/></div>
+        <button class="btn btn-accent" onclick="adminLogin()">Admin Login</button>
+        <button class="btn btn-ghost" onclick="showPlayerLogin()">← Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYER SCREEN -->
+<div class="screen" id="screen-player">
+  <div class="header">
+    <div class="logo"><div class="logo-icon">🔥</div><div><div class="logo-text">FF 1v1 Arena</div><div class="logo-sub">Lone Wolf</div></div></div>
+    <div style="text-align:right"><div style="font-size:16px;font-weight:700;color:var(--green)" id="p-pts-hdr">0 pts</div><div style="font-size:10px;color:var(--text2)">My points</div></div>
+  </div>
+  <div class="content">
+    <div class="tab active" id="pt-home">
+      <div class="hero" id="player-hero"></div>
+      <div class="points-card">
+        <div style="font-size:36px;font-weight:800;color:var(--green)" id="p-pts-big">0</div>
+        <div style="font-size:12px;color:var(--text2)">Points</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:4px" id="p-pts-eq">= Rs. 0</div>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Mode select කරන්න</div>
+      <div class="mode-grid">
+        <div class="mode-card sel" id="mode-1v1" onclick="selMode('1v1')"><span style="font-size:24px;display:block;margin-bottom:4px">⚔️</span><div style="font-size:13px;font-weight:600">1 vs 1</div><div style="font-size:10px;color:var(--text2)">Lone Wolf</div></div>
+        <div class="mode-card" id="mode-2v2" onclick="selMode('2v2')"><span style="font-size:24px;display:block;margin-bottom:4px">👥</span><div style="font-size:13px;font-weight:600">2 vs 2</div><div style="font-size:10px;color:var(--text2)">Duo</div></div>
+        <div class="mode-card" id="mode-4v4" onclick="selMode('4v4')"><span style="font-size:24px;display:block;margin-bottom:4px">👨‍👩‍👧‍👦</span><div style="font-size:13px;font-weight:600">4 vs 4</div><div style="font-size:10px;color:var(--text2)">Squad</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">⚔️ Available matches</div>
+        <div id="avail-matches"><div class="empty"><span class="empty-icon">🎮</span>Matches නෑ.</div></div>
+      </div>
+    </div>
+    <div class="tab" id="pt-join" style="display:none"></div>
+    <div class="tab" id="pt-deposit">
+      <div class="card">
+        <div class="card-head">💰 Deposit points</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px">1 Point = Rs. 1 · Min: Rs. 50</div>
+        <div class="dep-amounts">
+          <div class="dep-amt sel" onclick="selDep(50)">Rs. 50</div>
+          <div class="dep-amt" onclick="selDep(100)">Rs. 100</div>
+          <div class="dep-amt" onclick="selDep(110)">Rs. 110</div>
+          <div class="dep-amt" onclick="selDep(200)">Rs. 200</div>
+          <div class="dep-amt" onclick="selDep(500)">Rs. 500</div>
+          <div class="dep-amt" onclick="selDep('custom')">Custom</div>
+        </div>
+        <div class="field" id="custom-dep-field" style="display:none">
+          <label>Amount (Rs.)</label>
+          <input id="custom-dep-amt" placeholder="Enter amount" type="number" oninput="curDepAmt=parseInt(this.value)||0"/>
+        </div>
+        <div class="tab-mini">
+          <button class="tab-mini-btn active" id="dep-slip-tab" onclick="depTab('slip')">📷 Bank Slip</button>
+          <button class="tab-mini-btn" id="dep-genie-tab" onclick="depTab('genie')">📱 Genie / eZ</button>
+        </div>
+        <div id="dep-slip-sec">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Bank: <strong style="color:var(--text)">Com Bank 8001234567 - FF Arena</strong></div>
+          <div class="upload-box" onclick="document.getElementById('dep-slip-file').click()"><span style="font-size:24px;display:block;margin-bottom:4px">📤</span>Slip upload කරන්න</div>
+          <input type="file" id="dep-slip-file" accept="image/*" style="display:none" onchange="previewDepSlip(event)">
+          <div id="dep-slip-prev"></div>
+        </div>
+        <div id="dep-genie-sec" style="display:none">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Genie: <strong style="color:var(--text)">07X XXX XXXX - FF Arena</strong></div>
+          <div class="field"><label>Transaction ID</label><input id="dep-g-ref" placeholder="GN2025XXXXXXXX"/></div>
+        </div>
+        <button class="btn btn-accent" onclick="submitDeposit()">💰 Deposit Submit</button>
+      </div>
+      <div class="card">
+        <div class="card-head">📋 Deposit history</div>
+        <div id="my-dep-hist"><div class="empty"><span class="empty-icon">💸</span>Deposits නෑ.</div></div>
+      </div>
+    </div>
+    <div class="tab" id="pt-withdraw">
+      <div class="card">
+        <div class="card-head">💸 Points Withdraw</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px">1 Point = Rs. 1 · Minimum withdraw: 100 Points</div>
+        <div style="background:linear-gradient(135deg,rgba(0,201,122,.1),rgba(0,163,98,.05));border:0.5px solid rgba(0,201,122,.2);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:11px;color:var(--text2)">Available Points</div><div style="font-size:24px;font-weight:800;color:var(--green)" id="wd-available">0</div></div>
+          <div style="text-align:right"><div style="font-size:11px;color:var(--text2)">= Cash Value</div><div style="font-size:16px;font-weight:700;color:var(--green)" id="wd-cash">Rs. 0</div></div>
+        </div>
+        <div class="field">
+          <label>Withdraw Amount (Points)</label>
+          <input id="wd-amount" placeholder="Min: 100 points" type="number" min="100" oninput="wdCalc()"/>
+        </div>
+        <div class="calc-box">
+          <div class="calc-row"><span class="l">Points</span><span class="v" id="wdc-pts">0 pts</span></div>
+          <div class="calc-row"><span class="l">Cash Value</span><span class="v" id="wdc-cash">Rs. 0</span></div>
+          <div class="calc-row total"><span class="l">Balance after</span><span class="v" id="wdc-bal">— pts</span></div>
+        </div>
+        <div class="field">
+          <label>Payment Method</label>
+          <select id="wd-method" onchange="wdMethodChange()">
+            <option value="bank">🏦 Bank Transfer</option>
+            <option value="genie">📱 Genie</option>
+            <option value="ez">📱 eZ Cash</option>
+          </select>
+        </div>
+
+
+        <div id="wd-bank-fields">
+          <div class="field">
+            <label>Bank Account Number</label>
+            <input id="wd-accnum" placeholder="eg: 1234567890" type="number"/>
+          </div>
+          <div class="field">
+            <label>Bank Name</label>
+            <input id="wd-bankname" placeholder="eg: Commercial Bank, BOC, Sampath..."/>
+          </div>
+        </div>
+        <div id="wd-mobile-fields" style="display:none">
+          <div class="field">
+            <label>Genie / eZ Phone Number</label>
+            <input id="wd-phone" placeholder="07X XXX XXXX" type="tel"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Account Owner Name</label>
+          <input id="wd-accname" placeholder="Bank account හිමිකරුගේ නම"/>
+        </div>
+        <button class="btn btn-green" onclick="submitWithdraw()">💸 Withdraw Request Submit</button>
+      </div>
+      <div class="card">
+        <div class="card-head">📋 Withdraw History</div>
+        <div id="my-wd-hist"><div class="empty"><span class="empty-icon">💸</span>Withdrawals නෑ.</div></div>
+      </div>
+    </div>
+    <div class="tab" id="pt-profile">
+      <div class="card" id="profile-view"></div>
+      <div class="card"><div class="card-head">🏆 My match history</div><div id="my-match-hist"><div class="empty"><span class="empty-icon">🎮</span>Matches නෑ.</div></div></div>
+      <button class="btn btn-ghost" onclick="logout()">🚪 Logout</button>
+    </div>
+    <!-- CHALLENGE TAB (unified) -->
+    <div class="tab" id="pt-challenge">
+
+      <!-- Mode selector tabs -->
+      <div class="tab-mini" style="margin-bottom:12px">
+        <button class="tab-mini-btn active" id="chmode-btn-1v1" onclick="selChallengeMode('1v1')">⚔️ 1 vs 1</button>
+        <button class="tab-mini-btn" id="chmode-btn-2v2" onclick="selChallengeMode('2v2')">👥 2 vs 2</button>
+        <button class="tab-mini-btn" id="chmode-btn-4v4" onclick="selChallengeMode('4v4')">👨‍👩‍👧‍👦 4 vs 4</button>
+      </div>
+
+      <!-- ======= 1v1 SECTION ======= -->
+      <div id="ch-section-1v1">
+        <div class="card">
+          <div class="card-head">⚔️ 1v1 Challenge</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Player 1 සහ Player 2 ගේ FF ID enter කරන්න 🔥</div>
+
+          <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🟠 Player 1</div>
+          <div class="field"><label>Player 1 FF ID</label><input id="ch1-p1-ffid" placeholder="Player 1 FF ID" type="number"/></div>
+
+          <div style="font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;margin-top:4px">🔵 Player 2</div>
+          <div class="field"><label>Player 2 FF ID</label><input id="ch1-p2-ffid" placeholder="Player 2 FF ID" type="number"/></div>
+
+          <div class="field">
+            <label>Entry fee (Points)</label>
+            <select id="ch1-fee" onchange="chCalc()">
+              <option value="50">50 pts</option>
+              <option value="100">100 pts</option>
+              <option value="110" selected>110 pts</option>
+              <option value="150">150 pts</option>
+              <option value="200">200 pts</option>
+              <option value="500">500 pts</option>
+            </select>
+          </div>
+          <div class="calc-box">
+            <div class="calc-row"><span class="l">Each fee</span><span class="v" id="ch1-fee-show">110 pts</span></div>
+            <div class="calc-row"><span class="l">Winner gets</span><span class="v" id="ch1-prize">200 pts</span></div>
+            <div class="calc-row total"><span class="l">My balance after</span><span class="v" id="ch1-bal">— pts</span></div>
+          </div>
+          <button class="btn btn-accent" onclick="sendChallengeNew('1v1')">⚔️ Challenge යවන්න</button>
+        </div>
+      </div>
+
+      <!-- ======= 2v2 SECTION ======= -->
+      <div id="ch-section-2v2" style="display:none">
+        <div class="card">
+          <div class="card-head">👥 2v2 Challenge</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Team දෙකේම FF IDs enter කරන්න 🔥</div>
+
+          <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🟠 Team 1</div>
+          <div class="field"><label>Team 1 - Player 1 FF ID</label><input id="ch2-t1p1" placeholder="Team 1 Player 1 FF ID" type="number"/></div>
+          <div class="field"><label>Team 1 - Player 2 FF ID</label><input id="ch2-t1p2" placeholder="Team 1 Player 2 FF ID" type="number"/></div>
+
+          <div style="font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;margin-top:4px">🔵 Team 2</div>
+          <div class="field"><label>Team 2 - Player 1 FF ID</label><input id="ch2-t2p1" placeholder="Team 2 Player 1 FF ID" type="number"/></div>
+          <div class="field"><label>Team 2 - Player 2 FF ID</label><input id="ch2-t2p2" placeholder="Team 2 Player 2 FF ID" type="number"/></div>
+
+          <div class="field">
+            <label>Entry fee (per player)</label>
+            <select id="ch2-fee" onchange="chCalc()">
+              <option value="50">50 pts</option>
+              <option value="100">100 pts</option>
+              <option value="110" selected>110 pts</option>
+              <option value="150">150 pts</option>
+              <option value="200">200 pts</option>
+              <option value="500">500 pts</option>
+            </select>
+          </div>
+          <div class="calc-box">
+            <div class="calc-row"><span class="l">Per player fee</span><span class="v" id="ch2-fee-show">110 pts</span></div>
+            <div class="calc-row"><span class="l">Total pot</span><span class="v" id="ch2-total">440 pts</span></div>
+            <div class="calc-row"><span class="l">Winner team gets</span><span class="v" id="ch2-prize">400 pts</span></div>
+          </div>
+          <button class="btn btn-accent" onclick="sendChallengeNew('2v2')">⚔️ Challenge යවන්න</button>
+        </div>
+      </div>
+
+      <!-- ======= 4v4 SECTION ======= -->
+      <div id="ch-section-4v4" style="display:none">
+        <div class="card">
+          <div class="card-head">👨‍👩‍👧‍👦 4v4 Challenge</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Teams දෙකේම FF IDs enter කරන්න 🔥</div>
+
+          <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🟠 Team 1</div>
+          <div class="field"><label>T1 Player 1 FF ID</label><input id="ch4-t1p1" placeholder="Team 1 P1 FF ID" type="number"/></div>
+          <div class="field"><label>T1 Player 2 FF ID</label><input id="ch4-t1p2" placeholder="Team 1 P2 FF ID" type="number"/></div>
+          <div class="field"><label>T1 Player 3 FF ID</label><input id="ch4-t1p3" placeholder="Team 1 P3 FF ID" type="number"/></div>
+          <div class="field"><label>T1 Player 4 FF ID</label><input id="ch4-t1p4" placeholder="Team 1 P4 FF ID" type="number"/></div>
+
+          <div style="font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;margin-top:4px">🔵 Team 2</div>
+          <div class="field"><label>T2 Player 1 FF ID</label><input id="ch4-t2p1" placeholder="Team 2 P1 FF ID" type="number"/></div>
+          <div class="field"><label>T2 Player 2 FF ID</label><input id="ch4-t2p2" placeholder="Team 2 P2 FF ID" type="number"/></div>
+          <div class="field"><label>T2 Player 3 FF ID</label><input id="ch4-t2p3" placeholder="Team 2 P3 FF ID" type="number"/></div>
+          <div class="field"><label>T2 Player 4 FF ID</label><input id="ch4-t2p4" placeholder="Team 2 P4 FF ID" type="number"/></div>
+
+          <div class="field">
+            <label>Entry fee (per player)</label>
+            <select id="ch4-fee" onchange="chCalc()">
+              <option value="50">50 pts</option>
+              <option value="100">100 pts</option>
+              <option value="110" selected>110 pts</option>
+              <option value="150">150 pts</option>
+              <option value="200">200 pts</option>
+              <option value="500">500 pts</option>
+            </select>
+          </div>
+          <div class="calc-box">
+            <div class="calc-row"><span class="l">Per player fee</span><span class="v" id="ch4-fee-show">110 pts</span></div>
+            <div class="calc-row"><span class="l">Total pot</span><span class="v" id="ch4-total">880 pts</span></div>
+            <div class="calc-row"><span class="l">Winner team gets</span><span class="v" id="ch4-prize">800 pts</span></div>
+          </div>
+          <button class="btn btn-accent" onclick="sendChallengeNew('4v4')">⚔️ Challenge යවන්න</button>
+        </div>
+      </div>
+
+      <!-- My sent challenges & requests -->
+      <div class="card">
+        <div class="card-head">📋 My Challenges / Requests <span id="incoming-cnt" style="color:var(--red)"></span></div>
+        <div id="my-join-reqs"><div class="empty"><span class="empty-icon">⚔️</span>Challenges නෑ.</div></div>
+      </div>
+
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="pTab('home')" id="pnav-home"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="nav-btn" onclick="pTab('challenge')" id="pnav-challenge"><svg viewBox="0 0 24 24"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/><path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"/><path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/><path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"/><path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"/></svg>Challenge</button>
+    <button class="nav-btn" onclick="pTab('deposit')" id="pnav-deposit"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>Deposit</button>
+    <button class="nav-btn" onclick="pTab('withdraw')" id="pnav-withdraw"><svg viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>Withdraw</button>
+    <button class="nav-btn" onclick="pTab('profile')" id="pnav-profile"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</button>
+  </nav>
+</div>
+
+<!-- ADMIN SCREEN -->
+<div class="screen" id="screen-admin">
+  <div class="header">
+    <div class="logo"><div class="logo-icon">🔥</div><div><div class="logo-text">FF Arena Admin</div><div class="logo-sub">Management</div></div></div>
+    <div style="text-align:right"><div style="font-size:16px;font-weight:700;color:var(--green)" id="a-profit-hdr">Rs. 0</div><div style="font-size:10px;color:var(--text2)">Profit</div></div>
+  </div>
+  <div class="content">
+    <div class="tab active" id="at-rooms">
+      <div style="background:linear-gradient(135deg,rgba(0,201,122,.15),rgba(0,163,98,.05));border:0.5px solid rgba(0,201,122,.3);border-radius:12px;padding:14px;margin-bottom:12px">
+        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">💰 Admin Wallet</div>
+        <div style="font-size:32px;font-weight:800;color:var(--green)" id="aw-points">0 Points</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px">Collected: <span id="aw-collected">0 points</span> · Paid: <span id="aw-paid">0 points</span> · Profit: <span style="color:var(--green)" id="aw-profit">0 points</span></div>
+      </div>
+      <div class="summary">
+        <div class="sum-card"><div class="sum-val" id="a-active">0</div><div class="sum-lbl">Active</div></div>
+        <div class="sum-card"><div class="sum-val" style="color:var(--amber)" id="a-pending">0</div><div class="sum-lbl">Dep pending</div></div>
+        <div class="sum-card"><div class="sum-val" id="a-done">0</div><div class="sum-lbl">Done</div></div>
+      </div>
+      <div class="card"><div class="card-head">⚔️ Active rooms</div><div id="a-room-list"><div class="empty"><span class="empty-icon">🎮</span>Rooms නෑ.</div></div></div>
+    </div>
+    <div class="tab" id="at-create">
+      <div class="card">
+        <div class="card-head">➕ New room</div>
+        <div class="field"><label>Mode</label><select id="a-mode"><option value="1v1">1v1 Lone Wolf</option><option value="2v2">2v2 Duo</option><option value="4v4">4v4 Squad</option></select></div>
+        <div class="field"><label>Player 1</label>
+          <div class="player-search-wrap"><input id="ap1-s" placeholder="Name or FF ID..." autocomplete="off" oninput="aSearchP(1)" onfocus="aSearchP(1)"/><div class="player-dropdown" id="ap1-dd"></div></div>
+          <div id="ap1-sel" style="display:none"></div>
+        </div>
+        <div class="field"><label>Player 2</label>
+          <div class="player-search-wrap"><input id="ap2-s" placeholder="Name or FF ID..." autocomplete="off" oninput="aSearchP(2)" onfocus="aSearchP(2)"/><div class="player-dropdown" id="ap2-dd"></div></div>
+          <div id="ap2-sel" style="display:none"></div>
+        </div>
+        <div class="field"><label>Entry fee (per player)</label>
+          <select id="a-fee" onchange="aCalc()"><option value="50">Rs. 50</option><option value="100">Rs. 100</option><option value="110" selected>Rs. 110</option><option value="150">Rs. 150</option><option value="200">Rs. 200</option><option value="500">Rs. 500</option></select>
+        </div>
+        <div class="calc-box">
+          <div class="calc-row"><span class="l">Total</span><span class="v" id="ac-tot">220 pts</span></div>
+          <div class="calc-row"><span class="l">Winner gets</span><span class="v" id="ac-win">200 pts</span></div>
+          <div class="calc-row total"><span class="l">Profit</span><span class="v" id="ac-pr">20 pts</span></div>
+        </div>
+        <div class="field"><label>Room ID (optional)</label><input id="a-rid" placeholder="#FF001"/></div>
+        <button class="btn btn-accent" onclick="aCreateRoom()">🔥 Create Room</button>
+      </div>
+    </div>
+    <div class="tab" id="at-deposits">
+      <div class="tab-mini">
+        <button class="tab-mini-btn active" id="dtab-dep" onclick="dTab('dep')">💰 Deposits <span id="dep-cnt" style="color:var(--amber)"></span></button>
+        <button class="tab-mini-btn" id="dtab-req" onclick="dTab('req')">⚔️ Room Requests <span id="req-cnt" style="color:var(--amber)"></span></button>
+        <button class="tab-mini-btn" id="dtab-wd" onclick="dTab('wd')">💸 Withdrawals <span id="wd-cnt" style="color:var(--amber)"></span></button>
+      </div>
+      <div id="dsec-dep">
+        <div class="card"><div class="card-head">💰 Pending deposits</div><div id="a-dep-list"><div class="empty"><span class="empty-icon">✅</span>Pending නෑ!</div></div></div>
+      </div>
+      <div id="dsec-req" style="display:none">
+        <div class="card"><div class="card-head">⚔️ Match Join Requests</div><div id="a-req-list"><div class="empty"><span class="empty-icon">⚔️</span>Requests නෑ!</div></div></div>
+      </div>
+      <div id="dsec-wd" style="display:none">
+        <div class="card"><div class="card-head">💸 Pending Withdrawals</div><div id="a-wd-list"><div class="empty"><span class="empty-icon">💸</span>Withdraw requests නෑ!</div></div></div>
+      </div>
+    </div>
+    <div class="tab" id="at-players">
+      <div class="card"><div class="card-head">👥 All players <span style="color:var(--text3);margin-left:auto" id="a-p-cnt">0</span></div><div id="a-p-list"><div class="empty"><span class="empty-icon">👤</span>Players නෑ.</div></div></div>
+    </div>
+    <div class="tab" id="at-pending">
+      <div class="card">
+        <div class="card-head">🏆 Pending winner approvals <span style="color:var(--amber)" id="pending-cnt"></span></div>
+        <div id="a-pending-list"><div class="empty"><span class="empty-icon">🏆</span>Pending winners නෑ!</div></div>
+      </div>
+    </div>
+    <div class="tab" id="at-stats">
+      <div class="card">
+        <div class="card-head">📊 Summary</div>
+        <div class="stat-row"><span class="l">Matches</span><span class="v" id="ast-m">0</span></div>
+        <div class="stat-row"><span class="l">Collected</span><span class="v" id="ast-c">0</span></div>
+        <div class="stat-row"><span class="l">Paid out</span><span class="v" id="ast-p">0</span></div>
+        <div class="stat-row profit"><span class="l">Profit</span><span class="v" id="ast-pr">0</span></div>
+      </div>
+      <div class="card"><div class="card-head">📋 History</div><div id="a-hist-list"><div class="empty"><span class="empty-icon">📋</span>History නෑ.</div></div></div>
+      <button class="btn btn-ghost" onclick="adminLogout()">🚪 Admin logout</button>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="aTab('rooms')" id="anav-rooms"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Rooms</button>
+    <button class="nav-btn" onclick="aTab('create')" id="anav-create"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>Create</button>
+    <button class="nav-btn" onclick="aTab('pending')" id="anav-pending"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Winners</button>
+    <button class="nav-btn" onclick="aTab('deposits')" id="anav-deposits"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>Requests</button>
+    <button class="nav-btn" onclick="aTab('stats')" id="anav-stats"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Stats</button>
+  </nav>
+</div>
+
+<!-- WINNER MODAL -->
+<div class="modal-overlay" id="winner-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🏆 Winner select කරන්න</div>
+    <div id="winner-opts"></div>
+    <button class="btn btn-ghost" style="margin-top:6px" onclick="closeModal('winner-modal')">Cancel</button>
+  </div>
+</div>
+
+<!-- DEP MODAL -->
+<div class="modal-overlay" id="dep-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="dep-modal-title">💰 Deposit Verify</div>
+    <div id="dep-modal-body"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-green" style="flex:1" onclick="approveDep()">✓ Approve</button>
+      <button class="btn btn-red" style="flex:1" onclick="rejectDep()">✗ Reject</button>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="closeModal('dep-modal')">Cancel</button>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;margin-bottom:6px;font-size:28px" id="confirm-icon">⚠️</div>
+    <div class="modal-title" style="text-align:center" id="confirm-title">Sure?</div>
+    <div style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:20px" id="confirm-msg"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" style="flex:1" onclick="confirmResolve(false)">Cancel</button>
+      <button class="btn" style="flex:1" id="confirm-ok-btn" onclick="confirmResolve(true)">OK</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://vdgkoeazotsyloyvtlps.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkZ2tvZWF6b3RzeWxveXZ0bHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNDI4ODcsImV4cCI6MjA5NjkxODg4N30.TZER6aDkkloytdgIjVzPggOl_GndLpb4YGy0Qq80Wws';
+const ADMIN_PASS = 'admin123';
+
+const h = {'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY};
+
+async function sb(method, table, data, filter='') {
+  const url = SUPABASE_URL+'/rest/v1/'+table+(filter?'?'+filter:'');
+  // Use return=minimal for PATCH/DELETE to avoid RLS issues, representation only for POST selects
+  const prefer = method==='POST'?'return=representation':method==='PATCH'?'return=minimal':'';
+  const opts = {method, headers: {...h, ...(prefer?{'Prefer':prefer}:{})}};
+  if(data) opts.body = JSON.stringify(data);
+  const res = await fetch(url, opts);
+  if(!res.ok) { 
+    let errMsg = 'DB error: '+res.status;
+    try { const e = await res.json(); errMsg = e.message||e.hint||errMsg; } catch(e2){}
+    console.error('Supabase error on',method,table,':',errMsg);
+    throw new Error(errMsg);
+  }
+  if(method==='DELETE'||method==='PATCH') return null;
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function sbGet(table, filter='') { return sb('GET', table, null, filter); }
+async function sbPost(table, data) { return sb('POST', table, data); }
+async function sbPatch(table, data, filter) { return sb('PATCH', table, data, filter); }
+async function sbDelete(table, filter) { return sb('DELETE', table, null, filter); }
+
+let curUser = JSON.parse(localStorage.getItem('ff_user')||'null');
+let curOTP = null, pendingPhone = null, curMode = '1v1';
+let curDepAmt = 50, curDepType = 'slip';
+let selP1 = null, selP2 = null;
+let curDepId = null, curRoomId = null;
+let allPlayers = [], allRooms = [], allDeps = [], allHistory = [], allPendingRooms = [];
+
+async function init() {
+  // Always show login screen - no auto login
+  localStorage.removeItem('ff_user');
+  curUser = null;
+  showScreen('screen-login');
+}
+init();
+
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+window.sendOTP = function() {
+  const phone = document.getElementById('login-phone').value.trim();
+  if(phone.length < 9) { toast('Phone number හරි නෑ!','err'); return; }
+  pendingPhone = phone;
+  curOTP = Math.floor(100000+Math.random()*900000).toString();
+  document.getElementById('otp-field').style.display = 'block';
+  document.getElementById('otp-hint').textContent = '📱 Demo OTP: '+curOTP+' (Notify.lk connect කළාම real SMS)';
+  toast('OTP sent!','ok');
+}
+
+window.verifyOTP = async function() {
+  const otp = document.getElementById('login-otp').value.trim();
+  if(!curOTP) { toast('OTP යවන්න!','err'); return; }
+  if(otp !== curOTP) { toast('OTP wrong!','err'); return; }
+  showScreen('screen-loading');
+  try {
+    const p = await sbGet('players', 'phone=eq.'+encodeURIComponent(pendingPhone));
+    if(p && p.length) { curUser = p[0]; localStorage.setItem('ff_user', JSON.stringify(curUser)); goPlayer(); }
+    else { showScreen('screen-login'); document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; }
+  } catch(e) { toast('Error!','err'); showScreen('screen-login'); }
+}
+
+window.completeRegister = async function() {
+  const name = document.getElementById('reg-name').value.trim();
+  const ffid = document.getElementById('reg-ffid').value.trim();
+  if(!name||!ffid) { toast('Name සහ FF ID ඕනේ!','err'); return; }
+  showScreen('screen-loading');
+  try {
+    const res = await sbPost('players', {name, ffid, phone: pendingPhone, points: 0, wins: 0, matches: 0});
+    curUser = res[0]; localStorage.setItem('ff_user', JSON.stringify(curUser));
+    goPlayer(); toast('Welcome '+name+'! 🔥','ok');
+  } catch(e) { toast('Error: '+e.message,'err'); showScreen('screen-login'); }
+}
+
+window.showAdminLogin = function() { document.getElementById('login-form').style.display='none'; document.getElementById('admin-form').style.display='block'; }
+window.showPlayerLogin = function() { document.getElementById('login-form').style.display='block'; document.getElementById('admin-form').style.display='none'; document.getElementById('register-form').style.display='none'; }
+
+window.adminLogin = async function() {
+  if(document.getElementById('admin-pass').value === ADMIN_PASS) {
+    showScreen('screen-loading'); await loadAdminData(); showScreen('screen-admin'); toast('Admin login ✓','ok');
+  } else { toast('Password wrong!','err'); }
+}
+
+async function goPlayer() {
+  showScreen('screen-player');
+  await refreshPlayer();
+  loadAvailMatches();
+  // Request notification permission
+  setTimeout(async () => {
+    const granted = await requestNotificationPermission();
+    if(granted) {
+      toast('🔔 Notifications enabled! Challenges ආවාම notify කරනවා!','ok');
+    }
+  }, 2000);
+  setInterval(async()=>{ await refreshPlayer(); loadAvailMatches(); checkPushNotifications(); checkIncomingChallenges(); }, 10000);
+}
+
+async function refreshPlayer() {
+  try {
+    const p = await sbGet('players','id=eq.'+curUser.id);
+    if(p&&p.length) { curUser=p[0]; localStorage.setItem('ff_user',JSON.stringify(curUser)); updatePlayerUI(); }
+  } catch(e){}
+}
+
+function updatePlayerUI() {
+  if(!curUser) return;
+  document.getElementById('p-pts-hdr').textContent = curUser.points+' Points';
+  document.getElementById('p-pts-big').textContent = curUser.points;
+  document.getElementById('p-pts-eq').textContent = '= Rs. '+curUser.points;
+  document.getElementById('player-hero').innerHTML = `
+    <div class="hero-avatar">${curUser.name.substring(0,2).toUpperCase()}</div>
+    <div style="flex:1">
+      <div style="font-size:16px;font-weight:700">${curUser.name}</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:2px">FF ID: ${curUser.ffid} · 📞 ${curUser.phone}</div>
+      <div style="font-size:12px;color:var(--green);margin-top:2px">${curUser.wins}W / ${curUser.matches}M</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:20px;font-weight:800;color:var(--green)">${curUser.points}</div>
+      <div style="font-size:10px;color:var(--text2)">Points</div>
+    </div>`;
+}
+
+async function loadAvailMatches() {
+  try {
+    const rooms = await sbGet('rooms','status=eq.open&mode=eq.'+curMode);
+    const el = document.getElementById('avail-matches');
+    if(!rooms||!rooms.length) { el.innerHTML='<div class="empty"><span class="empty-icon">🎮</span>'+curMode+' matches නෑ.</div>'; return; }
+    el.innerHTML = rooms.map(r=>`
+      <div class="room-item">
+        <div class="room-vs">${r.p1} vs ${r.p2} <span class="badge b-live">${r.mode}</span></div>
+        <div class="room-meta">${r.id_custom||''} · Fee: ${r.fee} Points each</div>
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-top:4px">🏆 Winner: ${r.prize} pts</div>
+      </div>`).join('');
+  } catch(e) {}
+}
+
+window.selMode = function(m) { curMode=m; ['1v1','2v2','4v4'].forEach(x=>document.getElementById('mode-'+x).classList.toggle('sel',x===m)); loadAvailMatches(); }
+
+window.pTab = function(t) {
+  ['home','join','challenge','deposit','withdraw','profile'].forEach(x=>{ 
+    const el=document.getElementById('pt-'+x);
+    const nav=document.getElementById('pnav-'+x);
+    if(el) el.classList.toggle('active',x===t);
+    if(nav) nav.classList.toggle('active',x===t);
+  });
+  if(t==='profile') loadProfile();
+  if(t==='deposit') loadDepHist();
+  if(t==='challenge') { chCalc(); loadMyJoinReqs(); }
+  if(t==='withdraw') { loadWithdrawTab(); }
+}
+
+async function loadProfile() {
+  const p = await sbGet('players','id=eq.'+curUser.id);
+  if(p&&p.length) { curUser=p[0]; localStorage.setItem('ff_user',JSON.stringify(curUser)); }
+  const u = curUser;
+  document.getElementById('profile-view').innerHTML = `
+    <div class="card-head">👤 My Profile</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div class="prof-av" style="width:56px;height:56px;font-size:18px">${u.name.substring(0,2).toUpperCase()}</div>
+      <div><div style="font-size:18px;font-weight:700">${u.name}</div><div style="font-size:12px;color:var(--text2);margin-top:3px">FF ID: ${u.ffid}</div><div style="font-size:12px;color:var(--text2)">📞 ${u.phone}</div></div>
+    </div>
+    <div class="calc-box">
+      <div class="calc-row"><span class="l">Points</span><span class="v" style="color:var(--green)">${u.points} pts = Rs. ${u.points}</span></div>
+      <div class="calc-row"><span class="l">Wins</span><span class="v">${u.wins}</span></div>
+      <div class="calc-row"><span class="l">Matches</span><span class="v">${u.matches}</span></div>
+    </div>`;
+  const h1 = await sbGet('history','p1pid=eq.'+u.id);
+  const h2 = await sbGet('history','p2pid=eq.'+u.id);
+  const myM = [...(h1||[]),...(h2||[])];
+  const el = document.getElementById('my-match-hist');
+  if(!myM.length) { el.innerHTML='<div class="empty"><span class="empty-icon">🎮</span>Matches නෑ.</div>'; return; }
+  el.innerHTML = myM.map(m=>`
+    <div class="hist-item">
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">${m.p1} vs ${m.p2}</span><span style="font-size:11px;color:var(--text3)">${m.end_time||''}</span></div>
+      <div style="font-size:11px;color:var(--text2);margin-top:3px">${m.winner===u.name?'🏆 <span style="color:var(--green)">Won</span>':'❌ <span style="color:var(--red)">Lost</span>'} · ${m.mode} · ${m.prize} pts</div>
+    </div>`).join('');
+}
+
+async function loadDepHist() {
+  const deps = await sbGet('deposits','uid=eq.'+curUser.id+'&order=created_at.desc');
+  const el = document.getElementById('my-dep-hist');
+  if(!deps||!deps.length) { el.innerHTML='<div class="empty"><span class="empty-icon">💸</span>Deposits නෑ.</div>'; return; }
+  el.innerHTML = deps.map(d=>`
+    <div class="dep-item">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div style="font-size:13px;font-weight:600">Rs. ${d.amount}</div><div style="font-size:11px;color:var(--text2)">${d.type==='slip'?'Bank Slip':'Genie/eZ'}</div></div>
+        <span style="font-size:12px;padding:3px 8px;border-radius:999px;font-weight:600;${d.status==='approved'?'background:rgba(0,201,122,.1);color:var(--green)':d.status==='rejected'?'background:rgba(255,59,59,.1);color:var(--red)':'background:rgba(255,184,0,.1);color:var(--amber)'}">${d.status==='approved'?'✓ Approved':d.status==='rejected'?'✗ Rejected':'⏳ Pending'}</span>
+      </div>
+    </div>`).join('');
+}
+
+window.selDep = function(amt) {
+  curDepAmt = amt==='custom'?0:amt;
+  document.querySelectorAll('.dep-amt').forEach(el=>el.classList.toggle('sel',el.textContent===(amt==='custom'?'Custom':'Rs. '+amt)));
+  document.getElementById('custom-dep-field').style.display = amt==='custom'?'block':'none';
+}
+
+window.depTab = function(t) {
+  curDepType=t;
+  document.getElementById('dep-slip-tab').classList.toggle('active',t==='slip');
+  document.getElementById('dep-genie-tab').classList.toggle('active',t==='genie');
+  document.getElementById('dep-slip-sec').style.display=t==='slip'?'block':'none';
+  document.getElementById('dep-genie-sec').style.display=t==='genie'?'block':'none';
+}
+
+window.previewDepSlip = function(e) {
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{document.getElementById('dep-slip-prev').innerHTML=`<img src="${ev.target.result}" class="preview-img" alt="slip">`};
+  r.readAsDataURL(file);
+}
+
+window.submitDeposit = async function() {
+  if(!curUser){toast('Login කරන්න!','err');return;}
+  if(!curDepAmt||curDepAmt<50){toast('Minimum Rs. 50!','err');return;}
+  const ref = document.getElementById('dep-g-ref')?.value||'';
+  await sbPost('deposits',{uid:curUser.id,uname:curUser.name,amount:curDepAmt,type:curDepType,ref,status:'pending'});
+  toast('Deposit submitted! Admin verify කරාම points add වෙනවා 🔥','ok');
+  loadDepHist();
+}
+
+window.logout = function() { curUser=null; localStorage.removeItem('ff_user'); showScreen('screen-login'); showPlayerLogin(); document.getElementById('login-phone').value=''; document.getElementById('login-otp').value=''; document.getElementById('otp-field').style.display='none'; curOTP=null; }
+window.adminLogout = function() { showScreen('screen-login'); showPlayerLogin(); }
+
+async function loadAdminData() {
+  [allPlayers,allRooms,allDeps,allHistory] = await Promise.all([
+    sbGet('players','order=created_at.desc'),
+    sbGet('rooms','status=eq.open'),
+    sbGet('deposits','status=eq.pending&order=created_at.desc'),
+    sbGet('history','order=created_at.desc')
+  ]);
+  allPendingRooms = await sbGet('rooms','status=eq.pending_winner') || [];
+  aRenderRooms(); aUpdSummary(); await loadAdminWallet();
+}
+
+async function loadAdminWallet() {
+  try {
+    const aw = await sbGet('admin_wallet','limit=1');
+    if(aw&&aw.length) {
+      const w = aw[0];
+      document.getElementById('aw-points').textContent = (w.points||0)+' Points';
+      document.getElementById('aw-collected').textContent = (w.total_collected||0)+' points';
+      document.getElementById('aw-paid').textContent = (w.total_paid||0)+' points';
+      document.getElementById('aw-profit').textContent = ((w.total_collected||0) - (w.total_paid||0))+' points';
+    }
+  } catch(e){}
+}
+
+window.aTab = function(t) {
+  ['rooms','create','pending','deposits','stats'].forEach(x=>{
+    const el=document.getElementById('at-'+x);
+    const nav=document.getElementById('anav-'+x);
+    if(el) el.classList.toggle('active',x===t);
+    if(nav) nav.classList.toggle('active',x===t);
+  });
+  if(t==='deposits'){aRenderDeposits(); aRenderJoinRequests(); loadAdminWithdrawals();}
+  if(t==='stats'){aUpdStats();}
+  if(t==='rooms'){loadAdminData();}
+  if(t==='pending'){aRenderPending();}
+}
+
+window.aCalc = function() {
+  const f=parseInt(document.getElementById('a-fee').value);
+  const t=f*2,cut=Math.round(t*0.09),w=t-cut;
+  document.getElementById('ac-tot').textContent=t+' pts';
+  document.getElementById('ac-win').textContent=w+' pts';
+  document.getElementById('ac-pr').textContent=cut+' pts';
+}
+aCalc();
+
+window.aSearchP = async function(num) {
+  const q=document.getElementById('ap'+num+'-s').value.trim().toLowerCase();
+  const dd=document.getElementById('ap'+num+'-dd');
+  if(!q){dd.classList.remove('open');return;}
+  try {
+    const res = await sbGet('players','or=(name.ilike.*'+q+'*,ffid.ilike.*'+q+'*)&limit=8');
+    if(!res||!res.length){dd.classList.remove('open');return;}
+    dd.innerHTML=res.map(p=>`
+      <div class="player-opt" onclick="aSelP(${num},'${p.id}')">
+        <div class="p-opt-av">${p.name.substring(0,2).toUpperCase()}</div>
+        <div><div style="font-size:13px;font-weight:600;color:var(--text)">${p.name}</div><div style="font-size:11px;color:var(--text2)">FF: ${p.ffid} · ${p.points} pts</div></div>
+      </div>`).join('');
+    dd.classList.add('open');
+  } catch(e){}
+}
+
+window.aSelP = async function(num,pid) {
+  const res = await sbGet('players','id=eq.'+pid);
+  const p = res[0];
+  if(num===1)selP1=p;else selP2=p;
+  document.getElementById('ap'+num+'-s').value='';
+  document.getElementById('ap'+num+'-dd').classList.remove('open');
+  document.getElementById('ap'+num+'-sel').style.display='block';
+  document.getElementById('ap'+num+'-sel').innerHTML=`
+    <div class="sel-player">
+      <div class="p-opt-av">${p.name.substring(0,2).toUpperCase()}</div>
+      <div><div class="sel-player-name">${p.name}</div><div class="sel-player-id">FF: ${p.ffid} · ${p.points} pts</div></div>
+      <button class="clr-btn" onclick="aClrP(${num})">✕</button>
+    </div>`;
+}
+
+window.aClrP = function(num) { if(num===1)selP1=null;else selP2=null; document.getElementById('ap'+num+'-s').value=''; document.getElementById('ap'+num+'-sel').style.display='none'; }
+
+document.addEventListener('click',e=>{ if(!e.target.closest('.player-search-wrap')) document.querySelectorAll('.player-dropdown').forEach(d=>d.classList.remove('open')); });
+
+window.aCreateRoom = async function() {
+  if(!selP1||!selP2){toast('Players දෙන්නම select කරන්න!','err');return;}
+  if(selP1.id===selP2.id){toast('Same player!','err');return;}
+  const fee=parseInt(document.getElementById('a-fee').value);
+  const mode=document.getElementById('a-mode').value;
+  if(selP1.points<fee){toast(selP1.name+' points නෑ! ('+selP1.points+' pts)','err');return;}
+  if(selP2.points<fee){toast(selP2.name+' points නෑ! ('+selP2.points+' pts)','err');return;}
+  const rid=document.getElementById('a-rid').value.trim();
+  const t=fee*2,cut=Math.round(t*0.09),w=t-cut;
+  await sbPost('rooms',{mode,p1:selP1.name,p1id:selP1.ffid,p1pid:selP1.id,p2:selP2.name,p2id:selP2.ffid,p2pid:selP2.id,fee,total:t,prize:w,profit:cut,id_custom:rid||null,status:'open',winner:null});
+  await sbPatch('players',{points:selP1.points-fee},'id=eq.'+selP1.id);
+  await sbPatch('players',{points:selP2.points-fee},'id=eq.'+selP2.id);
+  // Add total to admin wallet
+  try {
+    const aw = await sbGet('admin_wallet','limit=1');
+    if(aw&&aw.length) {
+      const newPts = (parseInt(aw[0].points)||0) + t;
+      const newCol = (parseInt(aw[0].total_collected)||0) + t;
+      await fetch(SUPABASE_URL+'/rest/v1/admin_wallet?id=eq.'+aw[0].id, {
+        method:'PATCH',
+        headers:{...h,'Prefer':'return=minimal','Content-Type':'application/json'},
+        body: JSON.stringify({points: newPts, total_collected: newCol})
+      });
+    }
+  } catch(e){ console.log('wallet err',e); }
+  aClrP(1);aClrP(2);document.getElementById('a-rid').value='';
+  await loadAdminData();
+  toast('Room created! +'+t+' pts admin wallet එකට add වුණා 🔥','ok');aTab('rooms');
+}
+
+function aRenderRooms() {
+  const el=document.getElementById('a-room-list');
+  if(!allRooms||!allRooms.length){el.innerHTML='<div class="empty"><span class="empty-icon">🎮</span>Rooms නෑ.</div>';return;}
+  el.innerHTML=allRooms.map(r=>`
+    <div class="room-item">
+      <div class="room-top">
+        <div>
+          <div class="room-vs">${r.p1} vs ${r.p2} <span class="badge b-live">${r.mode}</span></div>
+          <div class="room-meta">${r.id_custom||''} · Fee: ${r.fee} Points · Prize: ${r.prize} Points</div>
+        </div>
+        <div class="room-acts">
+          <div class="icon-btn green" onclick="openWinner('${r.id}','${r.p1}','${r.p1pid}','${r.p2}','${r.p2id}','${r.p2pid}',${r.prize})">🏆</div>
+          <div class="icon-btn red" onclick="aDelRoom('${r.id}','${r.p1pid}','${r.p2pid}',${r.fee})">🗑</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+window.openWinner = function(id,p1n,p1pid,p2n,p2fid,p2pid,prize) {
+  curRoomId=id;
+  document.getElementById('winner-opts').innerHTML=[
+    {n:p1n,pid:p1pid},{n:p2n,pid:p2pid}
+  ].map(p=>`
+    <div class="winner-opt" onclick="setWinner('${p.n}','${p.pid}')">
+      <div class="w-avatar">${p.n.substring(0,2).toUpperCase()}</div>
+      <div><div style="font-size:15px;font-weight:600;color:var(--text)">${p.n}</div><div style="font-size:12px;color:var(--green)">${prize} pts ලැබේ</div></div>
+    </div>`).join('');
+  document.getElementById('winner-modal').classList.add('open');
+}
+
+window.setWinner = async function(pname,ppid) {
+  const r=allRooms.find(x=>x.id===curRoomId);
+  if(!r){toast('Room data error!','err');return;}
+  const endTime=new Date().toLocaleTimeString('si-LK',{hour:'2-digit',minute:'2-digit'});
+  // Mark room as pending winner approval
+  await sbPatch('rooms',{status:'pending_winner',winner:pname,winner_pid:ppid,end_time:endTime},'id=eq.'+curRoomId);
+  closeModal('winner-modal');
+  await loadAdminData();
+  aTab('pending');
+  toast(pname+' winner select වුණා! Winners tab එකෙන් approve කරන්න 🏆','ok');
+}
+
+window.aDelRoom = async function(id,p1pid,p2pid,fee) {
+  if(!(await appConfirm('Room delete කරන්නද? Players ට points refund වෙනවා.', {icon:'🗑️', title:'Room Delete', okLabel:'Delete', okClass:'btn-red'}))) return;
+  const p1=allPlayers.find(p=>p.id===p1pid);
+  const p2=allPlayers.find(p=>p.id===p2pid);
+  if(p1) await sbPatch('players',{points:p1.points+fee},'id=eq.'+p1pid);
+  if(p2) await sbPatch('players',{points:p2.points+fee},'id=eq.'+p2pid);
+  await sbDelete('rooms','id=eq.'+id);
+  await loadAdminData();
+  toast('Deleted. Points refunded.','ok');
+}
+
+async function aRenderPending() {
+  allPendingRooms = await sbGet('rooms','status=eq.pending_winner') || [];
+  const el = document.getElementById('a-pending-list');
+  const cnt = document.getElementById('pending-cnt');
+  cnt.textContent = allPendingRooms.length ? '('+allPendingRooms.length+')' : '';
+  if(!allPendingRooms.length){el.innerHTML='<div class="empty"><span class="empty-icon">🏆</span>Pending winners නෑ!</div>';return;}
+  el.innerHTML = allPendingRooms.map(r=>`
+    <div class="dep-item">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)">${r.p1} vs ${r.p2}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:3px">${r.mode} · Fee: ${r.fee} pts each</div>
+          <div style="font-size:13px;font-weight:700;color:var(--amber);margin-top:4px">🏆 Winner: ${r.winner}</div>
+          <div style="font-size:12px;color:var(--green)">Prize: ${r.prize} pts</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button style="flex:1;padding:10px;background:rgba(0,201,122,.1);color:var(--green);border:0.5px solid rgba(0,201,122,.3);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onclick="approveWinner('${r.id}','${r.winner}','${r.winner_pid}',${r.prize},${r.fee})">✓ Approve & Pay ${r.prize} pts</button>
+        <button style="flex:1;padding:10px;background:rgba(255,59,59,.1);color:var(--red);border:0.5px solid rgba(255,59,59,.3);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onclick="rejectWinner('${r.id}','${r.p1pid}','${r.p2pid}',${r.fee})">✗ Reject</button>
+      </div>
+    </div>`).join('');
+}
+
+window.approveWinner = async function(roomId, winnerName, winnerPid, prize, fee) {
+  if(!(await appConfirm(winnerName+' ට '+prize+' pts approve කරන්නද?', {icon:'🏆', title:'Winner Approve', okLabel:'Approve', okClass:'btn-green'}))) return;
+  const r = allPendingRooms.find(x=>x.id===roomId);
+  const endTime = r.end_time || new Date().toLocaleTimeString('si-LK',{hour:'2-digit',minute:'2-digit'});
+  // Add to history
+  await sbPost('history',{mode:r.mode,p1:r.p1,p1pid:r.p1pid,p2:r.p2,p2pid:r.p2pid,fee:r.fee,total:r.total,prize:r.prize,profit:r.profit,winner:winnerName,end_time:endTime});
+  // Delete room
+  await sbDelete('rooms','id=eq.'+roomId);
+  // Add points to winner
+  const wp = allPlayers.find(p=>p.id===winnerPid);
+  if(wp) await sbPatch('players',{points:(wp.points||0)+prize,wins:(wp.wins||0)+1,matches:(wp.matches||0)+1},'id=eq.'+winnerPid);
+  // Update loser matches
+  const lpid = r.p1pid===winnerPid ? r.p2pid : r.p1pid;
+  const lp = allPlayers.find(p=>p.id===lpid);
+  if(lp) await sbPatch('players',{matches:(lp.matches||0)+1},'id=eq.'+lpid);
+  // Deduct from admin wallet
+  try {
+    const aw = await sbGet('admin_wallet','limit=1');
+    if(aw&&aw.length) {
+      await fetch(SUPABASE_URL+'/rest/v1/admin_wallet?id=eq.'+aw[0].id, {
+        method:'PATCH',
+        headers:{...h,'Prefer':'return=minimal','Content-Type':'application/json'},
+        body: JSON.stringify({points:(parseInt(aw[0].points)||0)-prize, total_paid:(parseInt(aw[0].total_paid)||0)+prize})
+      });
+    }
+  } catch(e){}
+  await loadAdminData();
+  aRenderPending();
+  toast(winnerName+' ට '+prize+' Points add වුණා! 🏆','ok');
+}
+
+window.rejectWinner = async function(roomId, p1pid, p2pid, fee) {
+  if(!(await appConfirm('Reject කරන්නද? Players ට points refund වෙනවා.', {icon:'❌', title:'Winner Reject', okLabel:'Reject', okClass:'btn-red'}))) return;
+  // Refund both players - get fresh data from DB
+  const p1Res = await sbGet('players','id=eq.'+p1pid);
+  const p2Res = await sbGet('players','id=eq.'+p2pid);
+  if(p1Res&&p1Res.length) await sbPatch('players',{points:(p1Res[0].points||0)+fee},'id=eq.'+p1pid);
+  if(p2Res&&p2Res.length) await sbPatch('players',{points:(p2Res[0].points||0)+fee},'id=eq.'+p2pid);
+  // Deduct from admin wallet
+  try {
+    const aw = await sbGet('admin_wallet','limit=1');
+    if(aw&&aw.length) {
+      await fetch(SUPABASE_URL+'/rest/v1/admin_wallet?id=eq.'+aw[0].id, {
+        method:'PATCH',
+        headers:{...h,'Prefer':'return=minimal','Content-Type':'application/json'},
+        body: JSON.stringify({points:(parseInt(aw[0].points)||0)-(fee*2), total_collected:(parseInt(aw[0].total_collected)||0)-(fee*2)})
+      });
+    }
+  } catch(e){}
+  await sbDelete('rooms','id=eq.'+roomId);
+  await loadAdminData();
+  aRenderPending();
+  toast('Rejected. Points refunded.','ok');
+}
+
+async function aRenderDeposits() {
+  allDeps = await sbGet('deposits','status=eq.pending&order=created_at.desc')||[];
+  const el=document.getElementById('a-dep-list');
+  document.getElementById('dep-cnt').textContent=allDeps.length?'('+allDeps.length+')':'';
+  if(!allDeps.length){el.innerHTML='<div class="empty"><span class="empty-icon">✅</span>Pending නෑ!</div>';return;}
+  el.innerHTML=allDeps.map(d=>`
+    <div class="dep-item">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:13px;font-weight:600">${d.uname}</div>
+          <div style="font-size:11px;color:var(--text2)">${d.type==='slip'?'Bank Slip':'Genie'} · Rs. ${d.amount}</div>
+          ${d.ref?`<div style="font-size:11px;color:var(--text3)">Ref: ${d.ref}</div>`:''}
+        </div>
+        <div style="font-size:16px;font-weight:700;color:var(--green)">Rs. ${d.amount}</div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button style="flex:1;padding:7px;background:rgba(0,201,122,.1);color:var(--green);border:0.5px solid rgba(0,201,122,.3);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="openDepModal('${d.id}')">✓ Approve</button>
+        <button style="flex:1;padding:7px;background:rgba(255,59,59,.1);color:var(--red);border:0.5px solid rgba(255,59,59,.3);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="rejectDepDirect('${d.id}')">✗ Reject</button>
+      </div>
+    </div>`).join('');
+}
+
+window.openDepModal = function(id) {
+  curDepId=id;
+  const d=allDeps.find(x=>x.id===id);
+  document.getElementById('dep-modal-title').textContent='💰 '+d.uname+' - Rs. '+d.amount;
+  document.getElementById('dep-modal-body').innerHTML=`
+    <div class="calc-box">
+      <div class="calc-row"><span class="l">Player</span><span class="v">${d.uname}</span></div>
+      <div class="calc-row"><span class="l">Amount</span><span class="v" style="color:var(--green)">Rs. ${d.amount} → ${d.amount} pts</span></div>
+      <div class="calc-row"><span class="l">Method</span><span class="v">${d.type==='slip'?'Bank Slip':'Genie/eZ'}</span></div>
+      ${d.ref?`<div class="calc-row"><span class="l">Ref</span><span class="v">${d.ref}</span></div>`:''}
+    </div>`;
+  document.getElementById('dep-modal').classList.add('open');
+}
+
+window.approveDep = async function() {
+  const d=allDeps.find(x=>x.id===curDepId);
+  await sbPatch('deposits',{status:'approved'},'id=eq.'+curDepId);
+  const p=allPlayers.find(x=>x.id===d.uid);
+  if(p) await sbPatch('players',{points:p.points+d.amount},'id=eq.'+d.uid);
+  toast(d.uname+' '+d.amount+' pts added! ✓','ok');
+  closeModal('dep-modal'); await loadAdminData(); aRenderDeposits();
+}
+
+window.rejectDep = async function() {
+  await sbPatch('deposits',{status:'rejected'},'id=eq.'+curDepId);
+  toast('Rejected.','err'); closeModal('dep-modal'); aRenderDeposits();
+}
+
+window.rejectDepDirect = async function(id) {
+  await sbPatch('deposits',{status:'rejected'},'id=eq.'+id);
+  toast('Rejected.','err'); aRenderDeposits();
+}
+
+async function aRenderPlayers() {
+  allPlayers = await sbGet('players','order=points.desc')||[];
+  const el=document.getElementById('a-p-list');
+  document.getElementById('a-p-cnt').textContent=allPlayers.length;
+  if(!allPlayers.length){el.innerHTML='<div class="empty"><span class="empty-icon">👤</span>Players නෑ.</div>';return;}
+  el.innerHTML=allPlayers.map(p=>`
+    <div class="profile-card">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="prof-av">${p.name.substring(0,2).toUpperCase()}</div>
+        <div>
+          <div style="font-size:14px;font-weight:600">${p.name}</div>
+          <div style="font-size:11px;color:var(--text2)">FF: ${p.ffid} · 📞 ${p.phone}</div>
+          <div style="font-size:11px;color:var(--green)">${p.points} pts · ${p.wins||0}W/${p.matches||0}M</div>
+        </div>
+      </div>
+      <div class="icon-btn red" onclick="aDelPlayer('${p.id}')">🗑</div>
+    </div>`).join('');
+}
+
+window.aDelPlayer = async function(id) {
+  if(!(await appConfirm('Player delete කරන්නද?', {icon:'👤', title:'Player Delete', okLabel:'Delete', okClass:'btn-red'}))) return;
+  await sbDelete('players','id=eq.'+id);
+  await aRenderPlayers();
+  toast('Player deleted.','ok');
+}
+
+function aUpdSummary() {
+  document.getElementById('a-active').textContent=(allRooms||[]).length;
+  document.getElementById('a-pending').textContent=(allDeps||[]).length;
+  document.getElementById('a-done').textContent=(allHistory||[]).length;
+  document.getElementById('a-profit-hdr').textContent='Rs. '+(allHistory||[]).reduce((s,r)=>s+(r.profit||0),0);
+}
+
+async function aUpdStats() {
+  allHistory = await sbGet('history','order=created_at.desc')||[];
+  document.getElementById('ast-m').textContent=allHistory.length;
+  document.getElementById('ast-c').textContent=allHistory.reduce((s,r)=>s+(r.total||0),0)+' pts';
+  document.getElementById('ast-p').textContent=allHistory.reduce((s,r)=>s+(r.prize||0),0)+' pts';
+  document.getElementById('ast-pr').textContent=allHistory.reduce((s,r)=>s+(r.profit||0),0)+' pts';
+  const el=document.getElementById('a-hist-list');
+  if(!allHistory.length){el.innerHTML='<div class="empty"><span class="empty-icon">📋</span>History නෑ.</div>';return;}
+  el.innerHTML=allHistory.map(r=>`
+    <div class="hist-item">
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">${r.p1} vs ${r.p2} <span class="badge b-done">${r.mode}</span></span><span style="font-size:11px;color:var(--text3)">${r.end_time||''}</span></div>
+      <div style="font-size:11px;color:var(--text2);margin-top:3px">Winner: <strong style="color:var(--green)">${r.winner}</strong> · ${r.prize}pts · Profit: ${r.profit}pts</div>
+    </div>`).join('');
+}
+
+// ===== JOIN REQUEST FEATURE =====
+window.dTab = function(t) {
+  document.getElementById('dtab-dep').classList.toggle('active', t==='dep');
+  document.getElementById('dtab-req').classList.toggle('active', t==='req');
+  document.getElementById('dtab-wd').classList.toggle('active', t==='wd');
+  document.getElementById('dsec-dep').style.display = t==='dep' ? 'block' : 'none';
+  document.getElementById('dsec-req').style.display = t==='req' ? 'block' : 'none';
+  document.getElementById('dsec-wd').style.display = t==='wd' ? 'block' : 'none';
+  if(t==='wd') loadAdminWithdrawals();
+}
+
+let curJoinMode = '1v1';
+
+window.selJoinMode = function(m) {
+  curJoinMode = m;
+  ['1v1','2v2','4v4'].forEach(x => {
+    document.getElementById('jmode-'+x).classList.toggle('sel', x===m);
+    document.getElementById('join-fields-'+x).style.display = x===m ? 'block' : 'none';
+  });
+  joinCalc();
+}
+
+window.joinCalc = function() {
+  const fee = parseInt(document.getElementById('join-fee').value) || 110;
+  const total = fee * 2;
+  const cut = Math.round(total * 0.09);
+  const prize = total - cut;
+  const bal = (curUser ? curUser.points : 0) - fee;
+  document.getElementById('jc-fee').textContent = fee + ' pts';
+  document.getElementById('jc-win').textContent = prize + ' pts';
+  document.getElementById('jc-bal').style.color = bal < 0 ? 'var(--red)' : 'var(--green)';
+  document.getElementById('jc-bal').textContent = bal + ' pts';
+}
+
+window.submitJoinRequest = async function() {
+  if(!curUser){ toast('Login කරන්න!','err'); return; }
+  const fee = parseInt(document.getElementById('join-fee').value);
+  if(curUser.points < fee){ toast('Points මදි! ('+curUser.points+' pts)','err'); return; }
+
+  try {
+    let extraData = {};
+
+    if(curJoinMode === '1v1') {
+      const oppffid = document.getElementById('join-opp-ffid').value.trim();
+      if(!oppffid){ toast('Opponent FF ID දෙන්න!','err'); return; }
+      const opp = await sbGet('players','ffid=eq.'+oppffid);
+      if(!opp||!opp.length){ toast('Opponent FF ID හොඳ නෑ!','err'); return; }
+      if(opp[0].id === curUser.id){ toast('ඔයාම opponent නෙමෙයි!','err'); return; }
+      extraData = { opp_ffid: oppffid, opp_name: opp[0].name, opp_pid: opp[0].id };
+
+    } else if(curJoinMode === '2v2') {
+      const tm1 = document.getElementById('join-tm1').value.trim();
+      const op1 = document.getElementById('join-op1').value.trim();
+      const op2 = document.getElementById('join-op2').value.trim();
+      if(!tm1||!op1||!op2){ toast('IDs 3ම දෙන්න!','err'); return; }
+      extraData = {
+        opp_ffid: op1,
+        opp_name: 'Team',
+        opp_pid: '',
+        team_ids: JSON.stringify({ my_team:[curUser.ffid, tm1], opp_team:[op1, op2] })
+      };
+
+    } else if(curJoinMode === '4v4') {
+      const t1=document.getElementById('join-t1').value.trim();
+      const t2=document.getElementById('join-t2').value.trim();
+      const t3=document.getElementById('join-t3').value.trim();
+      const o1=document.getElementById('join-o1').value.trim();
+      const o2=document.getElementById('join-o2').value.trim();
+      const o3=document.getElementById('join-o3').value.trim();
+      const o4=document.getElementById('join-o4').value.trim();
+      if(!t1||!t2||!t3||!o1||!o2||!o3||!o4){ toast('IDs 7ම දෙන්න!','err'); return; }
+      extraData = {
+        opp_ffid: o1,
+        opp_name: 'Team',
+        opp_pid: '',
+        team_ids: JSON.stringify({ my_team:[curUser.ffid,t1,t2,t3], opp_team:[o1,o2,o3,o4] })
+      };
+    }
+
+    const total = fee*2, cut = Math.round(total*0.09), prize = total-cut;
+    await sbPost('join_requests',{
+      uid: curUser.id,
+      uname: curUser.name,
+      uffid: curUser.ffid,
+      mode: curJoinMode,
+      fee, total, prize,
+      profit: cut,
+      status: 'pending',
+      ...extraData
+    });
+    toast('Request submitted! Admin approve කාරාම room open වෙනවා 🔥','ok');
+    // Clear fields
+    ['join-opp-ffid','join-tm1','join-op1','join-op2','join-t1','join-t2','join-t3','join-o1','join-o2','join-o3','join-o4'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    loadMyJoinReqs();
+  } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+async function loadMyJoinReqs() {
+  try {
+    const reqs = await sbGet('join_requests','uid=eq.'+curUser.id+'&order=created_at.desc');
+    const el = document.getElementById('my-join-reqs');
+    if(!reqs||!reqs.length){ el.innerHTML='<div class="empty"><span class="empty-icon">⚔️</span>Requests නෑ.</div>'; return; }
+    el.innerHTML = reqs.map(r=>`
+      <div class="dep-item">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:13px;font-weight:600">${r.uname} vs ${r.opp_name} <span class="badge b-live">${r.mode}</span></div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">Fee: ${r.fee} pts · Prize: ${r.prize} pts</div>
+          </div>
+          <span style="font-size:12px;padding:3px 8px;border-radius:999px;font-weight:600;${r.status==='approved'?'background:rgba(0,201,122,.1);color:var(--green)':r.status==='rejected'?'background:rgba(255,59,59,.1);color:var(--red)':'background:rgba(255,184,0,.1);color:var(--amber)'}">${r.status==='approved'?'✓ Approved':r.status==='rejected'?'✗ Rejected':'⏳ Pending'}</span>
+        </div>
+      </div>`).join('');
+  } catch(e){}
+}
+
+// Admin - render join requests
+async function aRenderJoinRequests() {
+  try {
+    const reqs = await sbGet('join_requests','status=eq.pending&order=created_at.desc') || [];
+    const el = document.getElementById('a-req-list');
+    const cnt = document.getElementById('req-cnt');
+    cnt.textContent = reqs.length ? '('+reqs.length+')' : '';
+    if(!reqs.length){ el.innerHTML='<div class="empty"><span class="empty-icon">⚔️</span>Pending requests නෑ!</div>'; return; }
+    el.innerHTML = reqs.map(r=>{
+      let teamHtml = '';
+      if(r.team_ids) {
+        try {
+          const t = JSON.parse(r.team_ids);
+          teamHtml = `<div style="font-size:11px;color:var(--text2);margin-top:3px">👥 My Team: ${t.my_team.join(', ')}</div><div style="font-size:11px;color:var(--text2)">⚔️ Opp Team: ${t.opp_team.join(', ')}</div>`;
+        } catch(e){}
+      } else {
+        teamHtml = `<div style="font-size:11px;color:var(--text2);margin-top:3px">FF: ${r.uffid} vs ${r.opp_ffid}</div>`;
+      }
+      return `
+      <div class="dep-item">
+        <div style="margin-bottom:8px">
+          <div style="font-size:14px;font-weight:600;color:var(--text)">${r.uname} <span style="color:var(--text3)">vs</span> ${r.opp_name||'Team'} <span class="badge b-live">${r.mode}</span></div>
+          ${teamHtml}
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Fee: ${r.fee} pts each · Prize: ${r.prize} pts</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button style="flex:1;padding:9px;background:rgba(0,201,122,.1);color:var(--green);border:0.5px solid rgba(0,201,122,.3);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="approveJoinReq('${r.id}')">✓ Approve & Create Room</button>
+          <button style="flex:1;padding:9px;background:rgba(255,59,59,.1);color:var(--red);border:0.5px solid rgba(255,59,59,.3);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="rejectJoinReq('${r.id}')">✗ Reject</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){ console.log(e); }
+}
+
+window.approveJoinReq = async function(reqId) {
+  try {
+    const reqs = await sbGet('join_requests','id=eq.'+reqId);
+    if(!reqs||!reqs.length){ toast('Request හොයාගන්න බැරි!','err'); return; }
+    const r = reqs[0];
+    const isTeamMode = r.mode==='2v2' || r.mode==='4v4';
+
+    // Always fetch fresh player data directly from DB
+    const p1res = await sbGet('players','id=eq.'+r.uid);
+    if(!p1res||!p1res.length){ toast('Player 1 හොයාගන්න බැරි!','err'); return; }
+    const p1 = p1res[0];
+    if(p1.points < r.fee){ toast(r.uname+' points මදි! ('+p1.points+' pts)','err'); return; }
+
+    let p2 = null;
+    if(!isTeamMode) {
+      const p2res = await sbGet('players','id=eq.'+r.opp_pid);
+      if(!p2res||!p2res.length){ toast('Opponent හොයාගන්න බැරි!','err'); return; }
+      p2 = p2res[0];
+      if(p2.points < r.fee){ toast(r.opp_name+' points මදි! ('+p2.points+' pts)','err'); return; }
+    }
+
+    const oppLabel = isTeamMode ? (r.opp_name||'Team') : r.opp_name;
+    if(!(await appConfirm(r.uname+' vs '+oppLabel+' room create කරන්නද?', {icon:'⚔️', title:'Room Create', okLabel:'Create', okClass:'btn-accent'}))) return;
+
+    // Create room - send only fields that exist in your table
+    const roomData = {
+      mode: r.mode,
+      p1: r.uname,
+      p1id: r.uffid,
+      p1pid: r.uid,
+      p2: oppLabel,
+      p2id: r.opp_ffid||'',
+      p2pid: r.opp_pid||'',
+      fee: r.fee,
+      total: r.total,
+      prize: r.prize,
+      profit: r.profit,
+      status: 'open',
+      winner: null
+    };
+    // Only add team_ids if it exists in request and is not null
+    if(r.team_ids) roomData.team_ids = r.team_ids;
+
+    try {
+      await sbPost('rooms', roomData);
+    } catch(e) {
+      toast('Room create error: '+e.message,'err');
+      console.error('Room create failed:', e);
+      return;
+    }
+
+    // Deduct points - use fresh values from DB
+    try {
+      await sbPatch('players',{points: p1.points - r.fee},'id=eq.'+r.uid);
+    } catch(e){ console.error('p1 points deduct failed:',e); }
+
+    if(!isTeamMode && p2) {
+      try {
+        await sbPatch('players',{points: p2.points - r.fee},'id=eq.'+r.opp_pid);
+      } catch(e){ console.error('p2 points deduct failed:',e); }
+    }
+
+    // Admin wallet update
+    try {
+      const aw = await sbGet('admin_wallet','limit=1');
+      if(aw&&aw.length) {
+        await fetch(SUPABASE_URL+'/rest/v1/admin_wallet?id=eq.'+aw[0].id, {
+          method:'PATCH',
+          headers:{...h,'Prefer':'return=minimal','Content-Type':'application/json'},
+          body: JSON.stringify({points:(parseInt(aw[0].points)||0)+r.total, total_collected:(parseInt(aw[0].total_collected)||0)+r.total})
+        });
+      }
+    } catch(e){ console.error('wallet update failed:',e); }
+
+    // Mark request as approved
+    try {
+      await sbPatch('join_requests',{status:'approved'},'id=eq.'+reqId);
+    } catch(e){ console.error('status update failed:',e); }
+
+    await loadAdminData();
+    aRenderJoinRequests();
+    toast(r.uname+' vs '+oppLabel+' room created! 🔥','ok');
+  } catch(e){ 
+    console.error('approveJoinReq error:', e);
+    toast('Error: '+e.message,'err'); 
+  }
+}
+
+window.rejectJoinReq = async function(reqId) {
+  if(!(await appConfirm('Request reject කරන්නද?', {icon:'❌', title:'Reject Request', okLabel:'Reject', okClass:'btn-red'}))) return;
+  await sbPatch('join_requests',{status:'rejected'},'id=eq.'+reqId);
+  aRenderJoinRequests();
+  toast('Request rejected.','err');
+}
+
+window.closeModal = function(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(el=>{el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});});
+
+// Custom confirm dialog (replaces browser confirm())
+let _confirmResolve = null;
+window.appConfirm = function(msg, {title='තහවුරු කරන්න', icon='⚠️', okLabel='OK', okClass='btn-accent'} = {}) {
+  return new Promise(resolve => {
+    _confirmResolve = resolve;
+    document.getElementById('confirm-icon').textContent = icon;
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-msg').textContent = msg;
+    const btn = document.getElementById('confirm-ok-btn');
+    btn.textContent = okLabel;
+    btn.className = 'btn ' + okClass;
+    document.getElementById('confirm-modal').classList.add('open');
+  });
+}
+
+// ===== WITHDRAW SYSTEM =====
+
+window.wdCalc = function() {
+  const pts = parseInt(document.getElementById('wd-amount').value) || 0;
+  const bal = curUser ? curUser.points : 0;
+  document.getElementById('wdc-pts').textContent = pts + ' pts';
+  document.getElementById('wdc-cash').textContent = 'Rs. ' + pts;
+  document.getElementById('wdc-bal').textContent = (bal - pts) + ' pts';
+}
+
+window.wdMethodChange = function() {
+  const m = document.getElementById('wd-method').value;
+  document.getElementById('wd-bank-fields').style.display = m === 'bank' ? 'block' : 'none';
+  document.getElementById('wd-mobile-fields').style.display = m !== 'bank' ? 'block' : 'none';
+}
+
+async function loadWithdrawTab() {
+  if(!curUser) return;
+  const p = await sbGet('players','id=eq.'+curUser.id);
+  if(p&&p.length) { curUser=p[0]; localStorage.setItem('ff_user',JSON.stringify(curUser)); }
+  document.getElementById('wd-available').textContent = curUser.points;
+  document.getElementById('wd-cash').textContent = 'Rs. ' + curUser.points;
+  wdCalc();
+  loadMyWithdrawHist();
+}
+
+async function loadMyWithdrawHist() {
+  const wds = await sbGet('withdrawals','uid=eq.'+curUser.id+'&order=created_at.desc');
+  const el = document.getElementById('my-wd-hist');
+  if(!wds||!wds.length) { el.innerHTML='<div class="empty"><span class="empty-icon">💸</span>Withdrawals නෑ.</div>'; return; }
+  el.innerHTML = wds.map(w=>`
+    <div class="dep-item">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:13px;font-weight:600">${w.points} pts → Rs. ${w.points}</div>
+          <div style="font-size:11px;color:var(--text2)">${w.method==='bank'?'🏦 Bank':w.method==='genie'?'📱 Genie':'📱 eZ Cash'} · ${w.account}</div>
+        </div>
+        <span style="font-size:12px;padding:3px 8px;border-radius:999px;font-weight:600;${w.status==='approved'?'background:rgba(0,201,122,.1);color:var(--green)':w.status==='rejected'?'background:rgba(255,59,59,.1);color:var(--red)':'background:rgba(255,184,0,.1);color:var(--amber)'}">${w.status==='approved'?'✓ Paid':w.status==='rejected'?'✗ Rejected':'⏳ Pending'}</span>
+      </div>
+    </div>`).join('');
+}
+
+window.submitWithdraw = async function() {
+  if(!curUser){toast('Login කරන්න!','err');return;}
+  const pts = parseInt(document.getElementById('wd-amount').value)||0;
+  const method = document.getElementById('wd-method').value;
+  const accname = document.getElementById('wd-accname').value.trim();
+  if(pts < 100){toast('Minimum 100 points!','err');return;}
+  if(curUser.points < pts){toast('Points මදි! ('+curUser.points+' pts)','err');return;}
+  if(!accname){toast('Account owner name fill කරන්න!','err');return;}
+  let account = '', bankname = '';
+  if(method === 'bank') {
+    account = document.getElementById('wd-accnum').value.trim();
+    bankname = document.getElementById('wd-bankname').value.trim();
+    if(!account){toast('Account number fill කරන්න!','err');return;}
+    if(!bankname){toast('Bank name fill කරන්න!','err');return;}
+  } else {
+    account = document.getElementById('wd-phone').value.trim();
+    if(!account){toast('Phone number fill කරන්න!','err');return;}
+    bankname = '';
+  }
+  if(!(await appConfirm(pts+' pts withdraw request submit කරන්නද?\nRs. '+pts+' ගෙවනවා.', {icon:'💸', title:'Withdraw Confirm', okLabel:'Submit', okClass:'btn-green'}))) return;
+  try {
+    await sbPost('withdrawals',{uid:curUser.id, uname:curUser.name, phone:curUser.phone, points:pts, method, account, bankname, accname, status:'pending'});
+    await sbPatch('players',{points: curUser.points - pts},'id=eq.'+curUser.id);
+    curUser.points -= pts;
+    localStorage.setItem('ff_user',JSON.stringify(curUser));
+    document.getElementById('wd-amount').value = '';
+    document.getElementById('wd-accnum') && (document.getElementById('wd-accnum').value = '');
+    document.getElementById('wd-bankname') && (document.getElementById('wd-bankname').value = '');
+    document.getElementById('wd-accname').value = '';
+    toast('Withdraw request submit! Admin approve කළාම cash ගෙවනවා 💸','ok');
+    loadWithdrawTab();
+    updatePlayerUI();
+  } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+async function loadAdminWithdrawals() {
+  try {
+    const wds = await sbGet('withdrawals','status=eq.pending&order=created_at.desc');
+    const el = document.getElementById('a-wd-list');
+    const pendingCnt = wds ? wds.length : 0;
+    document.getElementById('wd-cnt').textContent = pendingCnt > 0 ? '('+pendingCnt+')' : '';
+    if(!wds||!wds.length) { el.innerHTML='<div class="empty"><span class="empty-icon">💸</span>Pending withdrawals නෑ!</div>'; return; }
+    el.innerHTML = wds.map(w=>`
+      <div style="background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div>
+            <div style="font-size:14px;font-weight:700">${w.uname}</div>
+            <div style="font-size:11px;color:var(--text2)">📞 ${w.phone}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:18px;font-weight:800;color:var(--green)">Rs. ${w.points}</div>
+            <div style="font-size:10px;color:var(--text2)">${w.points} Points</div>
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;padding:10px;margin-bottom:10px">
+          <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">💳 Payment Details</div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:0.5px solid var(--border)">
+            <span style="color:var(--text2)">Method</span>
+            <span style="font-weight:600">${w.method==='bank'?'🏦 Bank Transfer':w.method==='genie'?'📱 Genie':'📱 eZ Cash'}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:0.5px solid var(--border)">
+            <span style="color:var(--text2)">Account Owner</span>
+            <span style="font-weight:700;color:var(--text)">${w.accname}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:0.5px solid var(--border)">
+            <span style="color:var(--text2)">${w.method==='bank'?'Account No.':'Phone'}</span>
+            <span style="font-weight:800;color:var(--amber);font-size:15px;letter-spacing:.5px">${w.account}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0">
+            <span style="color:var(--text2)">Bank Name</span>
+            <span style="font-weight:600;color:var(--blue)">${w.bankname||'-'}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-green" style="flex:1;padding:10px" onclick="approveWithdraw('${w.id}',${w.points},'${w.uid}')">✓ Approve</button>
+          <button class="btn btn-red" style="flex:1;padding:10px" onclick="rejectWithdraw('${w.id}',${w.points},'${w.uid}')">✗ Reject</button>
+        </div>
+      </div>`).join('');
+  } catch(e){ console.error(e); }
+}
+
+window.approveWithdraw = async function(wdId, pts, uid) {
+  if(!(await appConfirm('Rs. '+pts+' ගෙව්වාද? Approve කරන්නද?', {icon:'💸', title:'Approve Withdrawal', okLabel:'Approve', okClass:'btn-green'}))) return;
+  try {
+    await sbPatch('withdrawals',{status:'approved'},'id=eq.'+wdId);
+    toast('Withdrawal approved! Rs. '+pts+' paid ✓','ok');
+    loadAdminWithdrawals();
+  } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+window.rejectWithdraw = async function(wdId, pts, uid) {
+  if(!(await appConfirm('Reject කර points ආපහු දෙන්නද?', {icon:'❌', title:'Reject Withdrawal', okLabel:'Reject & Refund', okClass:'btn-red'}))) return;
+  try {
+    await sbPatch('withdrawals',{status:'rejected'},'id=eq.'+wdId);
+    const p = await sbGet('players','id=eq.'+uid);
+    if(p&&p.length) await sbPatch('players',{points: p[0].points + pts},'id=eq.'+uid);
+    toast('Rejected. Points '+pts+' refund කළා.','err');
+    loadAdminWithdrawals();
+  } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+window.confirmResolve = function(val) {
+  document.getElementById('confirm-modal').classList.remove('open');
+  if(_confirmResolve) { _confirmResolve(val); _confirmResolve = null; }
+}
+
+// ===== CHALLENGE SYSTEM =====
+let curChallengeMode = '1v1';
+
+window.selChallengeMode = function(m) {
+  curChallengeMode = m;
+  ['1v1','2v2','4v4'].forEach(x => {
+    const btn = document.getElementById('chmode-btn-'+x);
+    const sec = document.getElementById('ch-section-'+x);
+    if(btn) btn.classList.toggle('active', x===m);
+    if(sec) sec.style.display = x===m ? 'block' : 'none';
+  });
+  chCalc();
+}
+
+window.chCalc = function() {
+  const bal = curUser ? (curUser.points||0) : 0;
+
+  // 1v1
+  const f1 = parseInt(document.getElementById('ch1-fee')?.value||110);
+  const p1 = Math.round(f1*2*0.91);
+  if(document.getElementById('ch1-fee-show')) document.getElementById('ch1-fee-show').textContent = f1+' pts';
+  if(document.getElementById('ch1-prize')) document.getElementById('ch1-prize').textContent = p1+' pts';
+  if(document.getElementById('ch1-bal')) {
+    const b1 = bal-f1;
+    document.getElementById('ch1-bal').textContent = b1+' pts';
+    document.getElementById('ch1-bal').style.color = b1<0 ? 'var(--red)' : 'var(--green)';
+  }
+
+  // 2v2
+  const f2 = parseInt(document.getElementById('ch2-fee')?.value||110);
+  const tot2 = f2*4, p2 = Math.round(tot2*0.91);
+  if(document.getElementById('ch2-fee-show')) document.getElementById('ch2-fee-show').textContent = f2+' pts';
+  if(document.getElementById('ch2-total')) document.getElementById('ch2-total').textContent = tot2+' pts';
+  if(document.getElementById('ch2-prize')) document.getElementById('ch2-prize').textContent = p2+' pts';
+
+  // 4v4
+  const f4 = parseInt(document.getElementById('ch4-fee')?.value||110);
+  const tot4 = f4*8, p4 = Math.round(tot4*0.91);
+  if(document.getElementById('ch4-fee-show')) document.getElementById('ch4-fee-show').textContent = f4+' pts';
+  if(document.getElementById('ch4-total')) document.getElementById('ch4-total').textContent = tot4+' pts';
+  if(document.getElementById('ch4-prize')) document.getElementById('ch4-prize').textContent = p4+' pts';
+}
+
+window.sendChallenge = async function() { sendChallengeNew('1v1'); }
+
+window.sendChallengeNew = async function(mode) {
+  if(!curUser) { toast('Login කරන්න!','err'); return; }
+
+  try {
+    if(mode === '1v1') {
+      const p1ffid = document.getElementById('ch1-p1-ffid').value.trim();
+      const p2ffid = document.getElementById('ch1-p2-ffid').value.trim();
+      const fee = parseInt(document.getElementById('ch1-fee').value);
+      if(!p1ffid||!p2ffid) { toast('FF IDs දෙකම enter කරන්න!','err'); return; }
+      if(p1ffid===p2ffid) { toast('Players දෙන්නම same FF ID!','err'); return; }
+
+      const [p1res, p2res] = await Promise.all([
+        sbGet('players','ffid=eq.'+p1ffid),
+        sbGet('players','ffid=eq.'+p2ffid)
+      ]);
+      if(!p1res||!p1res.length) { toast('Player 1 FF ID '+p1ffid+' registered නෑ!','err'); return; }
+      if(!p2res||!p2res.length) { toast('Player 2 FF ID '+p2ffid+' registered නෑ!','err'); return; }
+      const p1 = p1res[0], p2 = p2res[0];
+
+      const total = fee*2, cut = Math.round(total*0.09), prize = total-cut;
+      await sbPost('join_requests',{
+        uid: p1.id, uname: p1.name, uffid: p1.ffid,
+        opp_pid: p2.id, opp_name: p2.name, opp_ffid: p2.ffid,
+        mode: '1v1', fee, total, prize, profit: cut, status: 'pending'
+      });
+      // Clear
+      document.getElementById('ch1-p1-ffid').value='';
+      document.getElementById('ch1-p2-ffid').value='';
+      toast('Challenge request sent! Admin approve කාරාම room open වෙනවා 🔥','ok');
+
+    } else if(mode === '2v2') {
+      const t1p1 = document.getElementById('ch2-t1p1').value.trim();
+      const t1p2 = document.getElementById('ch2-t1p2').value.trim();
+      const t2p1 = document.getElementById('ch2-t2p1').value.trim();
+      const t2p2 = document.getElementById('ch2-t2p2').value.trim();
+      const fee = parseInt(document.getElementById('ch2-fee').value);
+      if(!t1p1||!t1p2||!t2p1||!t2p2) { toast('FF IDs 4ම enter කරන්න!','err'); return; }
+
+      const p1res = await sbGet('players','ffid=eq.'+t1p1);
+      if(!p1res||!p1res.length) { toast('Team 1 P1 FF ID '+t1p1+' registered නෑ!','err'); return; }
+      const p1 = p1res[0];
+
+      const total = fee*4, cut = Math.round(total*0.09), prize = total-cut;
+      const teamIds = JSON.stringify({ my_team:[t1p1,t1p2], opp_team:[t2p1,t2p2] });
+      await sbPost('join_requests',{
+        uid: p1.id, uname: p1.name, uffid: p1.ffid,
+        opp_ffid: t2p1, opp_name: 'Team 2', opp_pid: '',
+        mode: '2v2', fee, total, prize, profit: cut,
+        status: 'pending', team_ids: teamIds
+      });
+      ['ch2-t1p1','ch2-t1p2','ch2-t2p1','ch2-t2p2'].forEach(id=>document.getElementById(id).value='');
+      toast('2v2 Challenge request sent! Admin approve කාරාම room open වෙනවා 🔥','ok');
+
+    } else if(mode === '4v4') {
+      const ids = ['ch4-t1p1','ch4-t1p2','ch4-t1p3','ch4-t1p4','ch4-t2p1','ch4-t2p2','ch4-t2p3','ch4-t2p4'];
+      const vals = ids.map(id=>document.getElementById(id).value.trim());
+      if(vals.some(v=>!v)) { toast('FF IDs 8ම enter කරන්න!','err'); return; }
+      const fee = parseInt(document.getElementById('ch4-fee').value);
+
+      const p1res = await sbGet('players','ffid=eq.'+vals[0]);
+      if(!p1res||!p1res.length) { toast('Team 1 P1 FF ID '+vals[0]+' registered නෑ!','err'); return; }
+      const p1 = p1res[0];
+
+      const total = fee*8, cut = Math.round(total*0.09), prize = total-cut;
+      const teamIds = JSON.stringify({ my_team:vals.slice(0,4), opp_team:vals.slice(4) });
+      await sbPost('join_requests',{
+        uid: p1.id, uname: p1.name, uffid: p1.ffid,
+        opp_ffid: vals[4], opp_name: 'Team 2', opp_pid: '',
+        mode: '4v4', fee, total, prize, profit: cut,
+        status: 'pending', team_ids: teamIds
+      });
+      ids.forEach(id=>document.getElementById(id).value='');
+      toast('4v4 Challenge request sent! Admin approve කාරාම room open වෙනවා 🔥','ok');
+    }
+
+    loadMyJoinReqs();
+  } catch(e){ toast('Error: '+e.message,'err'); console.error(e); }
+}
+
+async function loadChallenges() {
+  if(!curUser) return;
+  chCalc();
+  loadMyJoinReqs();
+}
+
+// Stub - no longer used but called from old code
+async function checkIncomingChallenges() {}
+
+// ===== SERVICE WORKER + PUSH NOTIFICATIONS =====
+let swReg = null;
+
+async function initSW() {
+  if(!('serviceWorker' in navigator)) return;
+  try {
+    swReg = await navigator.serviceWorker.register('/sw.js');
+    console.log('SW registered');
+    // Check for pending challenges every 30s
+    setInterval(checkPushNotifications, 30000);
+  } catch(e){ console.log('SW reg failed:', e); }
+}
+
+async function requestNotificationPermission() {
+  if(!('Notification' in window)) return false;
+  if(Notification.permission === 'granted') return true;
+  if(Notification.permission === 'denied') return false;
+  const perm = await Notification.requestPermission();
+  return perm === 'granted';
+}
+
+async function showLocalNotification(title, body, url='/') {
+  if(!('Notification' in window)) return;
+  if(Notification.permission !== 'granted') return;
+  if(swReg) {
+    await swReg.showNotification(title, {
+      body,
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      vibrate: [200, 100, 200],
+      data: url,
+      tag: 'ff-arena-'+Date.now()
+    });
+  } else {
+    new Notification(title, {body, icon: '/icon-192.png'});
+  }
+}
+
+// Check for new challenges/notifications for current player
+let lastChallengeCheck = 0;
+async function checkPushNotifications() {
+  if(!curUser) return;
+  try {
+    // Check pending challenges for this player
+    const challenges = await sbGet('join_requests',
+      'opp_pid=eq.'+curUser.id+'&status=eq.pending&created_at=gt.'+new Date(lastChallengeCheck).toISOString()
+    );
+    if(challenges && challenges.length > 0) {
+      for(const c of challenges) {
+        await showLocalNotification(
+          '⚔️ FF 1v1 Arena - Challenge!',
+          c.uname + ' ඔයාට ' + c.mode + ' challenge කළා! Rs.' + c.fee + ' entry fee.',
+          '/'
+        );
+      }
+      lastChallengeCheck = Date.now();
+      // Refresh UI
+      if(document.getElementById('pt-challenge') && 
+         document.getElementById('pt-challenge').classList.contains('active')) {
+        loadMyChallenges();
+      }
+    }
+    
+    // Check approved room requests
+    const approvedReqs = await sbGet('join_requests',
+      'uid=eq.'+curUser.id+'&status=eq.approved&created_at=gt.'+new Date(lastChallengeCheck).toISOString()
+    );
+    if(approvedReqs && approvedReqs.length > 0) {
+      for(const r of approvedReqs) {
+        await showLocalNotification(
+          '✅ FF 1v1 Arena - Room Ready!',
+          r.uname + ' vs ' + r.opp_name + ' room create වුණා! Play කරන්න ready!',
+          '/'
+        );
+      }
+    }
+  } catch(e){}
+}
+
+// Init SW on load
+initSW();
+
+window.toast = function(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type+' show';
+  setTimeout(()=>t.className='toast '+type,2800);
+}
+</script>
+</body>
+</html>
